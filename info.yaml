@@ -1,6 +1,6 @@
 # Tiny Tapeout project information
 project:
-  title:        "Triangle"      # Project title
+  title:        "Triangle Generation"      # Project title
   author:       "Pratik"      # Your name
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
   description:  "Triangle Generation "      # One line description of what your project does
