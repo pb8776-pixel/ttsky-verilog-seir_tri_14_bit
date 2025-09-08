@@ -24,6 +24,7 @@ module tt_um_sierpinski_lfsr (
     // Assign LFSR state to output
     always @(*) begin
         lfsr_out = lfsr;
-    end
+    end
 
 endmodule
+
