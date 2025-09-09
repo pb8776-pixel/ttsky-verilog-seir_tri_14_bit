@@ -1,18 +1,15 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
-/* This testbench instantiates the module and provides wires
-   that can be driven / tested by the cocotb test.py.
-*/
 module tb ();
 
-  // Dump the signals to a VCD file. You can view it with gtkwave or surfer.
+  // Dump the signals
   initial begin
     $dumpfile("tb.vcd");
     $dumpvars(0, tb);
   end
 
-  // Testbench signals:
+  // Testbench signals
   reg clk;
   reg rst_n;
   reg ena;
@@ -33,36 +30,18 @@ module tb ();
       .VPWR   (VPWR),
       .VGND   (VGND),
 `endif
-      .clk    (clk),     // system clock
-      .rst_n  (rst_n),   // active-low reset
-      .ena    (ena),     // enable
-      .ui_in  (ui_in),   // not used
-      .uo_out (uo_out),  // LFSR output
-      .uio_in (uio_in),  // not used
-      .uio_out(uio_out), // not used
-      .uio_oe (uio_oe)   // not used
+      .clk    (clk),
+      .rst_n  (rst_n),
+      .ena    (ena),
+      .ui_in  (ui_in),
+      .uo_out (uo_out),
+      .uio_in (uio_in),
+      .uio_out(uio_out),
+      .uio_oe (uio_oe)
   );
 
-  // Generate clock
+  // Clock generator (Cocotb will drive this as well, but having it here is safe)
   initial clk = 0;
-  always #5 clk = ~clk;  // 100MHz clock (period = 10ns)
-
-  // Stimulus
-  initial begin
-    // Initialize
-    rst_n  = 0;
-    ena    = 0;
-    ui_in  = 8'b0;
-    uio_in = 8'b0;
-
-    // Apply reset
-    #20;
-    rst_n = 1;
-    ena   = 1;   // enable LFSR
-
-    // Run for a while
-    #200;
-    $finish;
-  end
+  always #5 clk = ~clk;
 
 endmodule
