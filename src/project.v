@@ -1,15 +1,10 @@
-/*
- * Copyright (c) 2024 Your Name
- * SPDX-License-Identifier: Apache-2.0
- */
-
 `default_nettype none
 
 module tt_um_sierpinski_lfsr (
     input  wire clk,         // system clock
     input  wire rst_n,       // active-low reset
     input  wire ena,         // enable signal from Tiny Tapeout
-    input  wire [7:0] ui_in, // unused in this design
+    input  wire [7:0] ui_in, // unused
     output wire [7:0] uo_out,// map LFSR output here
     input  wire [7:0] uio_in,// unused
     output wire [7:0] uio_out, // unused
@@ -28,9 +23,9 @@ module tt_um_sierpinski_lfsr (
             lfsr <= {lfsr[6:0], feedback};
     end
 
-    // Drive outputs
-    assign uo_out  = lfsr;        // Send triangle row pattern out
-    assign uio_out = 8'b0;        // not used
-    assign uio_oe  = 8'b0;        // not used
+    //  Drive outputs according to TinyTapeout spec
+    assign uo_out  = lfsr;   // expose full LFSR on uo_out[7:0]
+    assign uio_out = 8'b0;   // not used
+    assign uio_oe  = 8'b0;   // not used
 
 endmodule
