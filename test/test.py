@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: © 2024 Tiny Tapeout
 # SPDX-License-Identifier: Apache-2.0
 
+
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
@@ -25,16 +26,20 @@ async def test_project(dut):
 
     dut._log.info("Test project behavior")
 
-    # Set the input values you want to test
+    # Apply test inputs
     dut.ui_in.value = 20
     dut.uio_in.value = 30
 
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
+    # Wait for a few cycles to allow DUT to process
+    await ClockCycles(dut.clk, 2)
 
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 50
+    # Log actual output
+    out_val = int(dut.uo_out.value)
+    dut._log.info(f"DUT output = {out_val}")
 
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+    # Adjust this check to match your DUT logic
+    # Example: if DUT is supposed to add ui_in + uio_in
+    expected = 20 + 30   # = 50
+    # If DUT is doing something else, update accordingly
+
+    assert out_val == expected, f"Expected {expected}, got {out_val}"
