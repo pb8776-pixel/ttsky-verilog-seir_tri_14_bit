@@ -3,28 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+`default_nettype none
+
 module tt_um_sierpinski_lfsr (
-    input  wire clk,        // system clock
-    input  wire rst_n,      // active-low reset
-    output reg  [13:0] lfsr_out // 14-bit LFSR state (row of triangle)
+    input  wire clk,         // system clock
+    input  wire rst_n,       // active-low reset
+    input  wire ena,         // enable signal from Tiny Tapeout
+    input  wire [7:0] ui_in, // unused in this design
+    output wire [7:0] uo_out,// map LFSR output here
+    input  wire [7:0] uio_in,// unused
+    output wire [7:0] uio_out, // unused
+    output wire [7:0] uio_oe   // unused
 );
 
-    reg [13:0] lfsr;
+    reg [7:0] lfsr;
 
-    // Feedback taps for maximal-length 14-bit LFSR (x^14 + x^13 + x^12 + x^2 + 1)
-    wire feedback = lfsr[13] ^ lfsr[12] ^ lfsr[11] ^ lfsr[1];
+    // Feedback taps for maximal-length LFSR (x^8 + x^6 + x^5 + x^4 + 1)
+    wire feedback = lfsr[7] ^ lfsr[5] ^ lfsr[4] ^ lfsr[3];
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n)
-            lfsr <= 14'b0000_0000_0000_01;  // seed value (single '1')
-        else
-            lfsr <= {lfsr[12:0], feedback};
+            lfsr <= 8'b0000_0001;  // seed value
+        else if (ena)              // only update when enabled
+            lfsr <= {lfsr[6:0], feedback};
     end
 
-    // Assign LFSR state to output
-    always @(*) begin
-        lfsr_out = lfsr;
-    end
+    // Drive outputs
+    assign uo_out  = lfsr;        // Send triangle row pattern out
+    assign uio_out = 8'b0;        // not used
+    assign uio_oe  = 8'b0;        // not used
 
 endmodule
-
