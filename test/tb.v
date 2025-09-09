@@ -1,60 +1,67 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
-/* This testbench just instantiates the module and makes some convenient wires
+/* This testbench instantiates the module and provides wires
    that can be driven / tested by the cocotb test.py.
 */
-module tb();
+module tb ();
 
-  reg clk, rst_n;
-  wire [13:0] lfsr_out;
-  integer i, row;
-  integer width = 14;    // visible width
-  integer full_width = 16; // internal width (power of 2)
+  // Dump the signals to a VCD file. You can view it with gtkwave or surfer.
+  initial begin
+    $dumpfile("tb.vcd");
+    $dumpvars(0, tb);
+  end
 
-  reg [15:0] curr_row, next_row;
+  // Testbench signals:
+  reg clk;
+  reg rst_n;
+  reg ena;
+  reg [7:0] ui_in;
+  reg [7:0] uio_in;
+  wire [7:0] uo_out;
+  wire [7:0] uio_out;
+  wire [7:0] uio_oe;
 
-  // Instantiate DUT (not used for triangle printing)
+`ifdef GL_TEST
+  wire VPWR = 1'b1;
+  wire VGND = 1'b0;
+`endif
+
+  // Instantiate DUT
   tt_um_sierpinski_lfsr user_project (
-    .clk(clk),
-    .rst_n(rst_n),
-    .lfsr_out(lfsr_out)
+`ifdef GL_TEST
+      .VPWR   (VPWR),
+      .VGND   (VGND),
+`endif
+      .clk    (clk),     // system clock
+      .rst_n  (rst_n),   // active-low reset
+      .ena    (ena),     // enable
+      .ui_in  (ui_in),   // not used
+      .uo_out (uo_out),  // LFSR output
+      .uio_in (uio_in),  // not used
+      .uio_out(uio_out), // not used
+      .uio_oe (uio_oe)   // not used
   );
 
-  // Clock generation
-  always #5 clk = ~clk;
+  // Generate clock
+  initial clk = 0;
+  always #5 clk = ~clk;  // 100MHz clock (period = 10ns)
 
+  // Stimulus
   initial begin
-    $display("=== Exact 14-bit Sierpinski Triangle (centered from 16-bit) ===");
-    clk = 0;
-    rst_n = 0;
-    #10 rst_n = 1;
+    // Initialize
+    rst_n  = 0;
+    ena    = 0;
+    ui_in  = 8'b0;
+    uio_in = 8'b0;
 
-    // Start with a single 1 in the middle of 16 bits
-    curr_row = 16'b0000000010000000;
+    // Apply reset
+    #20;
+    rst_n = 1;
+    ena   = 1;   // enable LFSR
 
-    // Generate 20 rows
-    for (row = 0; row < 20; row = row + 1) begin
-      @(posedge clk);
-
-      // Print leading spaces
-      for (i = 0; i < (width - row); i = i + 1)
-        $write(" ");
-
-      // Print only the middle 14 bits
-      for (i = width-1; i >= 0; i = i - 1) begin
-        if (curr_row[i+1])  // shift by 1 to drop edges
-          $write("* ");
-        else
-          $write("  ");
-      end
-      $write("\n");
-
-      // Pascal's rule: next row = XOR of neighbors
-      next_row = {curr_row[14:0], 1'b0} ^ {1'b0, curr_row[15:1]};
-      curr_row = next_row;
-    end
-
+    // Run for a while
+    #200;
     $finish;
   end
 
